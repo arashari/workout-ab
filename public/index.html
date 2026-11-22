@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f4f5fa">
+<title>Workout A &amp; B — Exercise Checklist</title>
+<meta name="description" content="Alternating dumbbell workout checklist with animated form demos — A and B switch daily.">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Workout A/B">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="application-name" content="Workout A/B">
+<style>
+:root{--ink:#171923;--muted:#62677a;--accent:#454b9a;--bg:#f4f5fa;--card:#fff;--line:#e3e6f0;--good:#227a55;--goodbg:#edf7f1;--goodline:#c3e3d3}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;-webkit-text-size-adjust:100%}
+h1{font-size:clamp(21px,5.2vw,32px);line-height:1.15;margin:0 0 4px}
+header{max-width:1080px;margin:auto;padding:16px 14px 8px}
+header p{margin:0;color:var(--muted);font-size:14px}
+.wrap{max-width:1080px;margin:auto;padding:0 14px calc(40px + env(safe-area-inset-bottom))}
+
+/* sticky control bar: tabs + progress */
+.bar{position:sticky;top:0;z-index:20;background:rgba(244,245,250,.94);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.bar-in{max-width:1080px;margin:auto;padding:8px 14px 9px}
+.tabs{display:flex;gap:8px}
+.tabs button{flex:1;min-height:46px;border:1px solid var(--line);background:#fff;border-radius:12px;font:inherit;font-weight:700;font-size:15px;color:var(--muted);cursor:pointer}
+.tabs button.active{background:var(--accent);border-color:var(--accent);color:#fff}
+.tabs button.suggested::after{content:"today";margin-left:7px;padding:2px 6px;border-radius:99px;background:#eef0ff;color:var(--accent);font-size:9.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;vertical-align:1px}
+.tabs button.suggested.active::after{background:rgba(255,255,255,.22);color:#fff}
+.prog{display:flex;align-items:center;gap:10px;margin-top:8px}
+.track{flex:1;height:7px;background:#e4e7f2;border-radius:99px;overflow:hidden}
+.track i{display:block;height:100%;width:0;background:var(--good);border-radius:99px;transition:width .3s ease}
+.count{font-size:12.5px;font-weight:800;color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums}
+
+main{padding-top:14px}
+.workout{display:none}
+.workout.active{display:grid;gap:12px}
+.exercise{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px 14px}
+.exercise.is-done{background:var(--goodbg);border-color:var(--goodline)}
+.exercise.is-done .num{color:var(--good)}
+.exercise.is-done .num::before{content:"✓";margin-right:4px;font-weight:800}
+.ttl{min-width:0}
+.num{color:var(--accent);margin-right:5px}
+h2{font-size:clamp(16.5px,4.4vw,18.5px);line-height:1.25;margin:0 0 7px}
+.meta{display:inline-block;background:var(--accent);color:#fff;font-size:12px;font-weight:800;letter-spacing:.01em;padding:3px 9px;border-radius:99px;margin-top:9px}
+.demos{display:grid;gap:10px;margin:10px 0 4px}
+.demos.two{grid-template-columns:repeat(auto-fit,minmax(min(100%,130px),1fr))}
+.demo{margin:0}
+.frames{height:clamp(150px,40vw,190px)}
+.frames img{display:block;width:100%;height:100%;object-fit:contain}
+figcaption{font-size:12px;font-weight:700;color:var(--muted);text-align:center;margin-top:3px}
+p.src{margin:9px 0 0;font-size:12.5px;color:var(--muted)}
+a.src{color:var(--accent);font-weight:700;text-decoration:none}
+a.src:hover{text-decoration:underline}
+.cue{margin:10px 0 7px;color:#31364a;font-size:14.5px;line-height:1.5}
+.avoid{margin:0;color:var(--muted);font-size:13.5px;line-height:1.45}
+.mk{font-weight:800;margin-right:5px}
+.mk.ok{color:var(--good)}
+.mk.no{color:#b4342f}
+
+.sr{position:absolute;width:1px;height:1px;padding:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+
+.footer{color:var(--muted);font-size:12.5px;padding:22px 0 0;border-top:1px solid var(--line);margin-top:18px}
+.footer p{margin:0 0 10px}
+.footer strong{color:var(--ink)}
+.footer a{color:var(--accent);font-weight:700;text-decoration:none}
+.footer a:hover{text-decoration:underline}
+.footer code{background:#fff;border:1px solid var(--line);padding:1px 5px;border-radius:5px;font-size:12px}
+.reset{font:inherit;font-size:13px;font-weight:700;color:var(--accent);background:#fff;border:1px solid var(--line);padding:10px 14px;border-radius:10px;cursor:pointer}
+.reset:disabled{opacity:.45;cursor:default}
+
+@media (max-width:819px){
+  html{scroll-snap-type:y proximity;scroll-padding-top:var(--barh,88px)}
+  .workout.active{display:block;gap:0}
+  .exercise{min-height:calc(100vh - var(--barh,88px) - 10px);min-height:calc(100dvh - var(--barh,88px) - 10px);margin-bottom:10px;display:flex;flex-direction:column;scroll-snap-align:start;scroll-snap-stop:always}
+  .ttl,.cue,.avoid{flex:none}
+  .meta{flex:none;align-self:flex-start}
+  .actions{flex:1 1 auto;min-height:150px;display:flex;flex-direction:column;margin:8px 0 0}
+  .demos{flex:1 1 auto;min-height:0;margin:0;display:flex;gap:10px}
+  .demos.two{display:flex}
+  .demo{flex:1 1 0;min-width:0;display:flex;flex-direction:column}
+  .frames{position:relative;flex:1 1 auto;min-height:90px;height:auto}
+  .frames img{position:absolute;inset:0;margin:auto;max-width:100%;max-height:100%;width:auto;height:auto}
+  figcaption{flex:none;margin-top:6px}
+  p.src{flex:none;margin-top:8px}
+  /* credits get their own snap screen, so the last exercise can be scrolled past */
+  .footer{scroll-snap-align:start;min-height:calc(100vh - var(--barh,88px) - 10px);min-height:calc(100dvh - var(--barh,88px) - 10px);margin-bottom:10px;padding-top:18px}
+}
+
+@media (min-width:820px){
+  header{padding:26px 18px 10px}
+  .tabs button{flex:0 0 auto;padding:0 28px}
+  .wrap{padding-left:18px;padding-right:18px}
+  .bar-in{padding-left:18px;padding-right:18px}
+  .workout.active{grid-template-columns:1fr 1fr;gap:14px;align-items:start}
+  .frames{height:215px}
+  .cue{font-size:15px}
+}
+@media print{
+  .bar,.tabs,.footer,.demos{display:none!important}
+  body{background:#fff}
+  .workout{display:grid!important;grid-template-columns:1fr 1fr;gap:10px}
+  .exercise{break-inside:avoid;padding:10px}
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>Workout A &amp; B</h1>
+  <p>Workout A and B alternate daily. Scroll through one exercise at a time — each is marked done as you pass it, and the checklist starts fresh each day.</p>
+</header>
+
+<div class="bar">
+  <div class="bar-in">
+    <nav class="tabs" aria-label="Choose workout">
+      <button class="active" data-tab="a" aria-pressed="true">Workout A</button>
+      <button data-tab="b" aria-pressed="false">Workout B</button>
+    </nav>
+    <div class="prog">
+      <div class="track"><i id="fill"></i></div>
+      <span class="count" id="count">0 / 10 done</span>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+<main>
+<section id="a" class="workout active"><article class="exercise" data-id="a1"><div class="ttl"><h2><span class="num">1.</span>Bench press / floor press / weighted push-ups</h2></div><div class="meta">3 sets × 8–15 reps</div><div class="actions"><div class="demos two"><figure class="demo"><div class="frames"><img decoding="async" src="art/dumbbell-bench-press.webp" alt="Bench press demonstration — start and finish position" loading="lazy"></div><figcaption>Bench press · <a class="src" href="https://www.youtube.com/watch?v=QsYre__-aro" target="_blank" rel="noopener">Tutorial ↗</a></figcaption></figure><figure class="demo"><div class="frames"><img decoding="async" src="art/dumbbell-floor-press.webp" alt="Floor press demonstration — start and finish position" loading="lazy"></div><figcaption>Floor press</figcaption></figure></div><p class="src"><a class="src" href="https://www.thesuperliftapp.com/exercises/dumbbell-bench-press" target="_blank" rel="noopener">Superlift page ↗</a> · <a class="src" href="https://www.thesuperliftapp.com/exercises/dumbbell-floor-press" target="_blank" rel="noopener">Floor press page ↗</a></p></div><p class="cue"><span class="mk ok" aria-hidden="true">✓</span><span class="sr">Posture: </span> Keep shoulder blades stable, feet planted for bench press, wrists stacked over elbows, and elbows roughly 30–45° from your torso. For push-ups, keep a straight line from head to heels.</p><p class="avoid"><span class="mk no" aria-hidden="true">✕</span><span class="sr">Avoid: </span> Flaring elbows, bouncing at the bottom, sagging hips, or letting wrists fold backward.</p></article><article class="exercise" data-id="a2"><div class="ttl"><h2><span class="num">2.</span>Pullover</h2></div><div class="meta">3 sets × 8–15 reps</div><div class="actions"><div class="demos"><figure class="demo"><div class="frames"><img decoding="async" src="art/dumbbell-pullover.webp" alt="Dumbbell pullover demonstration — start and finish position" loading="lazy"></div></figure></div><p class="src"><a class="src" href="https://www.youtube.com/watch?v=Q8l6ykgnmPM" target="_blank" rel="noopener">Tutorial video ↗</a> · <a class="src" href="https://www.thesuperliftapp.com/exercises/dumbbell-pullover" target="_blank" rel="noopener">Superlift page ↗</a></p></div><p class="cue"><span class="mk ok" aria-hidden="true">✓</span><span class="sr">Posture: </span> Keep a slight elbow bend throughout. Brace your abs and keep ribs down as the dumbbell moves behind your head.</p><p class="avoid"><span class="mk no" aria-hidden="true">✕</span><span class="sr">Avoid: </span> Overarching your lower back, bending the elbows more as you lower, or forcing an excessive shoulder stretch.</p></article><article class="exercise" data-id="a3"><div class="ttl"><h2><span class="num">3.</span>Overhead press</h2></div><div class="meta">3 sets × 8–15 reps</div><div class="actions"><div class="demos"><figure class="demo"><div class="frames"><img decoding="async" src="art/dumbbell-shoulder-press.webp" alt="Dumbbell shoulder press demonstration — start and finish position" loading="lazy"></div></figure></div><p class="src"><a class="src" href="https://www.youtube.com/watch?v=qEwKCR5JCog" target="_blank" rel="noopener">Tutorial video ↗</a> · <a class="src" href="https://www.thesuperliftapp.com/exercises/dumbbell-shoulder-press" target="_blank" rel="noopener">Superlift page ↗</a></p></div><p class="cue"><span class="mk ok" aria-hidden="true">✓</span><span class="sr">Posture: </span> Brace abs and glutes, keep ribs down, wrists over elbows, and press smoothly overhead.</p><p class="avoid"><span class="mk no" aria-hidden="true">✕</span><span class="sr">Avoid: </span> Leaning backward, shrugging excessively, or using leg drive when doing a strict press.</p></article><article class="exercise" data-id="a4"><div class="ttl"><h2><span class="num">4.</span>Biceps curl</h2></div><div class="meta">3 sets × 12–20 reps</div><div class="actions"><div class="demos"><figure class="demo"><div class="frames"><img decoding="async" src="art/dumbbell-bicep-curl.webp" alt="Dumbbell biceps curl demonstration — start and finish position" loading="lazy"></div></figure></div><p class="src"><a class="src" href="https://www.youtube.com/watch?v=MKWBV29S6c0" target="_blank" rel="noopener">Tutorial video ↗</a> · <a class="src" href="https://www.thesuperliftapp.com/exercises/dumbbell-bicep-curl" target="_blank" rel="noopener">Superlift page ↗</a></p></div><p class="cue"><span class="mk ok" aria-hidden="true">✓</span><span class="sr">Posture: </span> Stand tall, keep elbows close to your sides, wrists straight, and lower the weights slowly.</p><p class="avoid"><span class="mk no" aria-hidden="true">✕</span><span class="sr">Avoid: </span> Swinging your torso, drifting elbows forward, or bending the wrists.</p></article><article class="exercise" data-id="a5"><div class="ttl"><h2><span class="num">5.</span>Skullcrusher / overhead extension</h2></div><div class="meta">3 sets × 15–20 reps</div><div class="actions"><div class="demos two"><figure class="demo"><div class="frames"><img decoding="async" src="art/skull-crusher.webp" alt="Skullcrusher demonstration — start and finish position" loading="lazy"></div><figcaption>Skullcrusher · <a class="src" href="https://www.youtube.com/watch?v=RavQHfFxbdA" target="_blank" rel="noopener">Tutorial ↗</a></figcaption></figure><figure class="demo"><div class="frames"><img decoding="async" src="art/overhead-triceps-extension-dumbbell.webp" alt="Overhead triceps extension demonstration — start and finish position" loading="lazy"></div><figcaption>Overhead extension · <a class="src" href="https://www.youtube.com/watch?v=-Vyt2QdsR7E" target="_blank" rel="noopener">Tutorial ↗</a></figcaption></figure></div><p class="src"><a class="src" href="https://www.thesuperliftapp.com/exercises/skull-crusher" target="_blank" rel="noopener">Superlift page ↗</a></p></div><p class="cue"><span class="mk ok" aria-hidden="true">✓</span><span class="sr">Posture: </span> Keep upper arms steady and bend mainly at the elbows. Maintain straight, neutral wrists and control the lowering phase.</p><p class="avoid"><span class="mk no" aria-hidden="true">✕</span><span class="sr">Avoid: </span> Flaring elbows, letting upper arms swing, or using a load that causes elbow discomfort.</p></article><article class="exercise" data-id="a6"><div class="ttl"><h2><span class="num">6.</span>Rear delt fly</h2></div><div class="meta">3 sets × 15–20 reps</div><div class="actions"><div class="demos"><figure class="demo"><div class="frames"><img decoding="async" src="art/reverse-dumbbell-fly.webp" alt="Rear delt fly demonstration — start and finish position" loading="lazy"></div></figure></div><p class="src"><a class="src" href="https://www.youtube.com/watch?v=d1QEddtoOq0" target="_blank" rel="noopener">Tutorial video ↗</a> · <a class="src" href="https://www.thesuperliftapp.com/exercises/reverse-dumbbell-fly" target="_blank" rel="noopener">Superlift page ↗</a></p></div><p class="cue"><span class="mk ok" aria-hidden="true">✓</span><span class="sr">Posture: </span> Hinge at the hips with a neutral back, soften the elbows, and move arms outward under control.</p><p class="avoid"><span class="mk no" aria-hidden="true">✕</span><span class="sr">Avoid: </span> Using momentum, shrugging, or turning the movement into a row.</p></article><article class="exercise" data-id="a7"><div class="ttl"><h2><span class="num">7.</span>Lateral raise</h2></div><div class="meta">3 sets × 15–20 reps</div><div class="actions"><div class="demos"><figure class="demo"><div class="frames"><img decoding="async" src="art/dumbbell-lateral-raise.webp" alt="Lateral raise demonstration — start and finish position" loading="lazy"></div></figure></div><p class="src"><a class="src" href="https://www.youtube.com/watch?v=v_ZkxWzYnMc" target="_blank" rel="noopener">Tutorial video ↗</a> · <a class="src" href="https://www.thesuperliftapp.com/exercises/dumbbell-lateral-raise" target="_blank" rel="noopener">Superlift page ↗</a></p></div><p class="cue"><span class="mk ok" aria-hidden="true">✓</span><span class="sr">Posture: </span> Keep a small bend in your elbows and raise arms out to around shoulder height with control.</p><p class="avoid"><span class="mk no" aria-hidden="true">✕</span><span class="sr">Avoid: </span> Swinging the dumbbells, shrugging, or lifting much higher than shoulder level if uncomfortable.</p></article><article class="exercise" data-id="a8"><div class="ttl"><h2><span class="num">8.</span>Front squat</h2></div><div class="meta">3 sets × 8–15 reps</div><div class="actions"><div class="demos"><figure class="demo"><div class="frames"><img decoding="async" src="art/front-squat.webp" alt="Front squat demonstration — start and finish position" loading="lazy"></div></figure></div><p class="src"><a class="src" href="https://www.youtube.com/watch?v=v-mQm_droHg" target="_blank" rel="noopener">Tutorial video ↗</a> · <a class="src" href="https://www.thesuperliftapp.com/exercises/front-squat" target="_blank" rel="noopener">Superlift page ↗</a></p></div><p class="cue"><span class="mk ok" aria-hidden="true">✓</span><span class="sr">Posture: </span> Keep torso tall, brace your trunk, maintain full-foot pressure, and let knees track in line with toes.</p><p class="avoid"><span class="mk no" aria-hidden="true">✕</span><span class="sr">Avoid: </span> Heels lifting, knees collapsing inward, or rounding your back under load.</p></article><article class="exercise" data-id="a9"><div class="ttl"><h2><span class="num">9.</span>Romanian deadlift</h2></div><div class="meta">3 sets × 8–15 reps</div><div class="actions"><div class="demos"><figure class="demo"><div class="frames"><img decoding="async" src="art/dumbbell-romanian-deadlift.webp" alt="Dumbbell Romanian deadlift demonstration — start and finish position" loading="lazy"></div></figure></div><p class="src"><a class="src" href="https://www.youtube.com/watch?v=FQKfr1YDhEk" target="_blank" rel="noopener">Tutorial video ↗</a> · <a class="src" href="https://www.thesuperliftapp.com/exercises/dumbbell-romanian-deadlift" target="_blank" rel="noopener">Superlift page ↗</a></p></div><p class="cue"><span class="mk ok" aria-hidden="true">✓</span><span class="sr">Posture: </span> Push hips backward, keep knees softly bent and spine neutral, and keep the weights close to your legs.</p><p class="avoid"><span class="mk no" aria-hidden="true">✕</span><span class="sr">Avoid: </span> Squatting the movement, rounding your back, or lowering beyond the point where you can maintain a neutral spine.</p></article><article class="exercise" data-id="a10"><div class="ttl"><h2><span class="num">10.</span>Calf raise</h2></div><div class="meta">3 sets × 15–25 reps</div><div class="actions"><div class="demos"><figure class="demo"><div class="frames"><img decoding="async" src="art/standing-calf-raise.webp" alt="Calf raise demonstration — start and finish position" loading="lazy"></div></figure></div><p class="src"><a class="src" href="https://www.youtube.com/watch?v=baEXLy09Ncc" target="_blank" rel="noopener">Tutorial video ↗</a> · <a class="src" href="https://www.thesuperliftapp.com/exercises/standing-calf-raise" target="_blank" rel="noopener">Superlift page ↗</a></p></div><p class="cue"><span class="mk ok" aria-hidden="true">✓</span><span class="sr">Posture: </span> Stand tall, rise onto the balls of your feet, pause briefly, then lower your heels slowly.</p><p class="avoid"><span class="mk no" aria-hidden="true">✕</span><span class="sr">Avoid: </span> Bouncing, rolling ankles outward, or using a range that causes pain.</p></article></section>
+<section id="b" class="workout"><article class="exercise" data-id="b1"><div class="ttl"><h2><span class="num">1.</span>Overhead press</h2></div><div class="meta">3 sets × 8–15 reps</div><div class="actions"><div class="demos"><figure class="demo"><div class="frames"><img decoding="async" src="art/dumbbell-shoulder-press.webp" alt="Dumbbell shoulder press demonstration — start and finish position" loading="lazy"></div></figure></div><p class="src"><a class="src" href="https://www.youtube.com/watch?v=qEwKCR5JCog" target="_blank" rel="noopener">Tutorial video ↗</a> · <a class="src" href="https://www.thesuperliftapp.com/exercises/dumbbell-shoulder-press" target="_blank" rel="noopener">Superlift page ↗</a></p></div><p class="cue"><span class="mk ok" aria-hidden="true">✓</span><span class="sr">Posture: </span> Brace abs and glutes, keep ribs down, wrists over elbows, and press smoothly overhead.</p><p class="avoid"><span class="mk no" aria-hidden="true">✕</span><span class="sr">Avoid: </span> Leaning backward, shrugging excessively, or using leg drive on a strict press.</p></article><article class="exercise" data-id="b2"><div class="ttl"><h2><span class="num">2.</span>Dumbbell row</h2></div><div class="meta">3 sets × 8–15 reps</div><div class="actions"><div class="demos"><figure class="demo"><div class="frames"><img decoding="async" src="art/dumbbell-row.webp" alt="Dumbbell row demonstration — start and finish position" loading="lazy"></div></figure></div><p class="src"><a class="src" href="https://www.youtube.com/watch?v=djKXLt7kv7Q" target="_blank" rel="noopener">Tutorial video ↗</a> · <a class="src" href="https://www.thesuperliftapp.com/exercises/dumbbell-row" target="_blank" rel="noopener">Superlift page ↗</a></p></div><p class="cue"><span class="mk ok" aria-hidden="true">✓</span><span class="sr">Posture: </span> Hinge with a neutral back, brace your torso, and pull your elbow toward your hip.</p><p class="avoid"><span class="mk no" aria-hidden="true">✕</span><span class="sr">Avoid: </span> Twisting your torso, shrugging, or jerking the dumbbell upward.</p></article><article class="exercise" data-id="b3"><div class="ttl"><h2><span class="num">3.</span>Incline bench press / decline push-up</h2></div><div class="meta">3 sets × 8–15 reps</div><div class="actions"><div class="demos two"><figure class="demo"><div class="frames"><img decoding="async" src="art/incline-dumbbell-press.webp" alt="Incline press demonstration — start and finish position" loading="lazy"></div><figcaption>Incline press · <a class="src" href="https://www.youtube.com/watch?v=hChjZQhX1Ls" target="_blank" rel="noopener">Tutorial ↗</a></figcaption></figure><figure class="demo"><div class="frames"><img decoding="async" src="art/decline-push-up.webp" alt="Decline push-up demonstration — start and finish position" loading="lazy"></div><figcaption>Decline push-up · <a class="src" href="https://www.youtube.com/watch?v=SKPab2YC8BE" target="_blank" rel="noopener">Tutorial ↗</a></figcaption></figure></div><p class="src"><a class="src" href="https://www.thesuperliftapp.com/exercises/incline-dumbbell-press" target="_blank" rel="noopener">Superlift page ↗</a></p></div><p class="cue"><span class="mk ok" aria-hidden="true">✓</span><span class="sr">Posture: </span> For incline press, keep shoulder blades stable and wrists stacked over elbows. For decline push-ups, keep your body aligned from head to heels.</p><p class="avoid"><span class="mk no" aria-hidden="true">✕</span><span class="sr">Avoid: </span> Flaring elbows, bouncing, or letting hips sag during push-ups.</p></article><article class="exercise" data-id="b4"><div class="ttl"><h2><span class="num">4.</span>Hammer curl</h2></div><div class="meta">3 sets × 12–20 reps</div><div class="actions"><div class="demos"><figure class="demo"><div class="frames"><img decoding="async" src="art/hammer-curl.webp" alt="Hammer curl demonstration — start and finish position" loading="lazy"></div></figure></div><p class="src"><a class="src" href="https://www.youtube.com/watch?v=8XLxfXROrTo" target="_blank" rel="noopener">Tutorial video ↗</a> · <a class="src" href="https://www.thesuperliftapp.com/exercises/hammer-curl" target="_blank" rel="noopener">Superlift page ↗</a></p></div><p class="cue"><span class="mk ok" aria-hidden="true">✓</span><span class="sr">Posture: </span> Keep palms facing each other, elbows close to your sides, and lower the dumbbells slowly.</p><p class="avoid"><span class="mk no" aria-hidden="true">✕</span><span class="sr">Avoid: </span> Swinging your body or letting elbows travel forward.</p></article><article class="exercise" data-id="b5"><div class="ttl"><h2><span class="num">5.</span>Triceps kickback</h2></div><div class="meta">3 sets × 15–20 reps</div><div class="actions"><div class="demos"><figure class="demo"><div class="frames"><img decoding="async" src="art/tricep-kickback.webp" alt="Triceps kickback demonstration — start and finish position" loading="lazy"></div></figure></div><p class="src"><a class="src" href="https://www.youtube.com/watch?v=6SS6K3lAwZ8" target="_blank" rel="noopener">Tutorial video ↗</a> · <a class="src" href="https://www.thesuperliftapp.com/exercises/tricep-kickback" target="_blank" rel="noopener">Superlift page ↗</a></p></div><p class="cue"><span class="mk ok" aria-hidden="true">✓</span><span class="sr">Posture: </span> Hinge forward with a neutral spine, keep upper arms close to your torso, and straighten elbows without moving upper arms.</p><p class="avoid"><span class="mk no" aria-hidden="true">✕</span><span class="sr">Avoid: </span> Rotating your torso, swinging the weights, or using momentum.</p></article><article class="exercise" data-id="b6"><div class="ttl"><h2><span class="num">6.</span>Rear delt fly</h2></div><div class="meta">3 sets × 15–20 reps</div><div class="actions"><div class="demos"><figure class="demo"><div class="frames"><img decoding="async" src="art/reverse-dumbbell-fly.webp" alt="Rear delt fly demonstration — start and finish position" loading="lazy"></div></figure></div><p class="src"><a class="src" href="https://www.youtube.com/watch?v=d1QEddtoOq0" target="_blank" rel="noopener">Tutorial video ↗</a> · <a class="src" href="https://www.thesuperliftapp.com/exercises/reverse-dumbbell-fly" target="_blank" rel="noopener">Superlift page ↗</a></p></div><p class="cue"><span class="mk ok" aria-hidden="true">✓</span><span class="sr">Posture: </span> Hinge at the hips with a neutral back, soften the elbows, and move arms outward under control.</p><p class="avoid"><span class="mk no" aria-hidden="true">✕</span><span class="sr">Avoid: </span> Using momentum, shrugging, or turning the movement into a row.</p></article><article class="exercise" data-id="b7"><div class="ttl"><h2><span class="num">7.</span>Lateral raise</h2></div><div class="meta">3 sets × 15–20 reps</div><div class="actions"><div class="demos"><figure class="demo"><div class="frames"><img decoding="async" src="art/dumbbell-lateral-raise.webp" alt="Lateral raise demonstration — start and finish position" loading="lazy"></div></figure></div><p class="src"><a class="src" href="https://www.youtube.com/watch?v=v_ZkxWzYnMc" target="_blank" rel="noopener">Tutorial video ↗</a> · <a class="src" href="https://www.thesuperliftapp.com/exercises/dumbbell-lateral-raise" target="_blank" rel="noopener">Superlift page ↗</a></p></div><p class="cue"><span class="mk ok" aria-hidden="true">✓</span><span class="sr">Posture: </span> Keep a small bend in your elbows and raise arms out to around shoulder height with control.</p><p class="avoid"><span class="mk no" aria-hidden="true">✕</span><span class="sr">Avoid: </span> Swinging the dumbbells, shrugging, or lifting much higher than shoulder level if uncomfortable.</p></article><article class="exercise" data-id="b8"><div class="ttl"><h2><span class="num">8.</span>Lunges</h2></div><div class="meta">3 sets × 12–15 reps</div><div class="actions"><div class="demos"><figure class="demo"><div class="frames"><img decoding="async" src="art/dumbbell-lunges.webp" alt="Lunges demonstration — start and finish position" loading="lazy"></div></figure></div><p class="src"><a class="src" href="https://www.thesuperliftapp.com/exercises/dumbbell-lunges" target="_blank" rel="noopener">Superlift page ↗</a></p></div><p class="cue"><span class="mk ok" aria-hidden="true">✓</span><span class="sr">Posture: </span> Take a stable stride, keep torso upright, lower under control, and track the front knee in line with your toes.</p><p class="avoid"><span class="mk no" aria-hidden="true">✕</span><span class="sr">Avoid: </span> Front knee collapsing inward, pushing off awkwardly, or losing balance.</p></article><article class="exercise" data-id="b9"><div class="ttl"><h2><span class="num">9.</span>Front squat</h2></div><div class="meta">3 sets × 8–12 reps</div><div class="actions"><div class="demos"><figure class="demo"><div class="frames"><img decoding="async" src="art/front-squat.webp" alt="Front squat demonstration — start and finish position" loading="lazy"></div></figure></div><p class="src"><a class="src" href="https://www.youtube.com/watch?v=v-mQm_droHg" target="_blank" rel="noopener">Tutorial video ↗</a> · <a class="src" href="https://www.thesuperliftapp.com/exercises/front-squat" target="_blank" rel="noopener">Superlift page ↗</a></p></div><p class="cue"><span class="mk ok" aria-hidden="true">✓</span><span class="sr">Posture: </span> Keep torso tall, brace your trunk, maintain full-foot pressure, and let knees track in line with toes.</p><p class="avoid"><span class="mk no" aria-hidden="true">✕</span><span class="sr">Avoid: </span> Heels lifting, knees collapsing inward, or rounding your back under load.</p></article><article class="exercise" data-id="b10"><div class="ttl"><h2><span class="num">10.</span>Calf raise</h2></div><div class="meta">3 sets × 15–25 reps</div><div class="actions"><div class="demos"><figure class="demo"><div class="frames"><img decoding="async" src="art/standing-calf-raise.webp" alt="Calf raise demonstration — start and finish position" loading="lazy"></div></figure></div><p class="src"><a class="src" href="https://www.youtube.com/watch?v=baEXLy09Ncc" target="_blank" rel="noopener">Tutorial video ↗</a> · <a class="src" href="https://www.thesuperliftapp.com/exercises/standing-calf-raise" target="_blank" rel="noopener">Superlift page ↗</a></p></div><p class="cue"><span class="mk ok" aria-hidden="true">✓</span><span class="sr">Posture: </span> Stand tall, rise onto the balls of your feet, pause briefly, then lower your heels slowly.</p><p class="avoid"><span class="mk no" aria-hidden="true">✕</span><span class="sr">Avoid: </span> Bouncing, rolling ankles outward, or using a range that causes pain.</p></article></section>
+</main>
+<div class="footer">
+  <p><strong>Workout list:</strong> <a href="https://www.youtube.com/watch?v=6Lrd6hpSly8" target="_blank" rel="noopener">The BEST Dumbbell Only Workout (Free Training Plan + Full Explanation)</a> — trainer winny, YouTube.</p>
+  <p><strong>Exercise artwork:</strong> <a href="https://www.thesuperliftapp.com" target="_blank" rel="noopener">Superlift</a> (thesuperliftapp.com), downloaded into <code>art/</code> as two-frame animated WebP files — start position → finish position. The loop shows the two key positions, not smooth motion.</p>
+  <p><strong>Form cues:</strong> concise coaching reminders, not a substitute for an in-person form check.</p>
+  <button class="reset" id="reset" type="button">Reset progress</button>
+</div>
+</div>
+<script>
+(function(){
+  const KEY='superlift.checklist.v2';
+  const pad=n=>String(n).padStart(2,'0');
+  const d0=new Date();
+  const TODAY=d0.getFullYear()+'-'+pad(d0.getMonth()+1)+'-'+pad(d0.getDate());
+  const other=t=>t==='a'?'b':'a';
+  /* tab you were on, workout suggested for today, and today's marks */
+  let state={tab:'a',today:'a',lastTab:null,date:null,done:{}};
+  try{
+    const raw=localStorage.getItem(KEY);
+    if(raw){
+      const p=JSON.parse(raw);
+      if(p&&typeof p==='object'){
+        state.lastTab = p.lastTab==='a'||p.lastTab==='b' ? p.lastTab : null;
+        if(p.date===TODAY){
+          state.date=TODAY;
+          state.done=p.done||{};
+          state.today = p.today==='b' ? 'b' : 'a';
+          state.tab   = p.tab==='a'||p.tab==='b' ? p.tab : state.today;
+        }
+      }
+    }
+  }catch(e){}
+  if(state.date!==TODAY){          /* new day: swap the workout, clear the marks */
+    state.date=TODAY;
+    state.done={};
+    state.today = state.lastTab ? other(state.lastTab) : 'a';
+    state.tab = state.today;
+  }
+  if(!state.lastTab) state.lastTab=state.tab;
+  const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}};
+  const cards=[...document.querySelectorAll('.exercise')];
+  const activeSection=()=>document.getElementById(state.tab);
+  const barEl=()=>document.querySelector('.bar');
+
+  function measureBar(){
+    const b=barEl();
+    if(b) document.documentElement.style.setProperty('--barh', b.offsetHeight+'px');
+  }
+
+  function paintProgress(){
+    const all=[...activeSection().querySelectorAll('.exercise')];
+    const done=all.filter(c=>c.classList.contains('is-done')).length;
+    document.getElementById('fill').style.width=(done/all.length*100)+'%';
+    document.getElementById('count').textContent=done+' / '+all.length+' done';
+    document.getElementById('reset').disabled=!cards.some(c=>c.classList.contains('is-done'));
+  }
+
+  function setTab(tab){
+    const changed=state.tab!==tab;
+    state.tab=tab; state.lastTab=tab; save();
+    document.querySelectorAll('.tabs button').forEach(b=>b.classList.toggle('suggested', b.dataset.tab===state.today));
+    if(changed) window.scrollTo({top:0,behavior:'auto'});
+    document.querySelectorAll('.tabs button').forEach(b=>{
+      const on=b.dataset.tab===tab;
+      b.classList.toggle('active',on); b.setAttribute('aria-pressed',on?'true':'false');
+    });
+    document.querySelectorAll('.workout').forEach(sec=>sec.classList.toggle('active',sec.id===tab));
+    paintProgress();
+  }
+
+  /* progress is tracked automatically: a card counts as done once it has
+     scrolled up past the sticky bar (i.e. you have moved on to the next one) */
+  function track(){
+    const cut=barEl().getBoundingClientRect().bottom+2;
+    const atEnd=window.innerHeight+window.scrollY>=document.documentElement.scrollHeight-6;
+    let changed=false;
+    activeSection().querySelectorAll('.exercise').forEach(card=>{
+      if(card.classList.contains('is-done')) return;
+      if(atEnd || card.getBoundingClientRect().bottom<=cut){
+        card.classList.add('is-done');
+        state.done[card.dataset.id]=true;
+        changed=true;
+      }
+    });
+    if(changed){save(); paintProgress();}
+  }
+  window.addEventListener('scroll',track,{passive:true});
+  window.addEventListener('scrollend',track,{passive:true});
+  window.addEventListener('resize',()=>{measureBar(); track();});
+  /* safety net: some browsers throttle/correct scroll positions (snap points,
+     momentum) without a follow-up scroll event, so poll cheaply as well */
+  const watchdog=setInterval(track,400);
+
+  document.querySelectorAll('.tabs button').forEach(b=>b.addEventListener('click',()=>setTab(b.dataset.tab)));
+
+  document.getElementById('reset').addEventListener('click',()=>{
+    if(!confirm('Reset all progress?')) return;
+    cards.forEach(c=>c.classList.remove('is-done'));
+    state.done={}; save(); paintProgress();
+  });
+
+  cards.forEach(card=>{ if(state.done[card.dataset.id]) card.classList.add('is-done'); });
+
+  measureBar();
+  setTab(state.tab);
+  track();
+})();
+</script>
+<script>
+(function(){
+  /* deep links from the manifest shortcuts: /?w=b opens workout B */
+  const want=new URLSearchParams(location.search).get('w');
+  if(want==='a'||want==='b'){
+    const KEY='superlift.checklist.v2';
+    try{const st=JSON.parse(localStorage.getItem(KEY)||'{}'); st.tab=want; localStorage.setItem(KEY,JSON.stringify(st));}catch(e){}
+  }
+  const secure = location.protocol==='https:' || ['localhost','127.0.0.1'].includes(location.hostname);
+  if('serviceWorker' in navigator && secure){
+    window.addEventListener('load',()=>{ navigator.serviceWorker.register('/sw.js').catch(()=>{}); });
+  }
+  /* keep the standalone window clear of the notch */
+  if(window.matchMedia('(display-mode: standalone)').matches){
+    document.documentElement.classList.add('standalone');
+  }
+})();
+</script>
+</body>
+</html>

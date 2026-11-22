@@ -1,0 +1,14 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "workout-ab",
+  "compatibility_date": "2026-11-01",
+  // pure static site: no Worker script, Cloudflare serves ./public
+  "assets": {
+    "directory": "./public",
+    "html_handling": "auto-trailing-slash",
+    "not_found_handling": "single-page-application"
+  },
+  "routes": [
+    { "pattern": "workout-ab.543710.xyz", "custom_domain": true }
+  ]
+}
